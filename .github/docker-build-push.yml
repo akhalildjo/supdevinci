@@ -1,0 +1,33 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build and Push Result Service
+      run: |
+        docker build -t registry:5000/result-service:latest ./result
+        docker push registry:5000/result-service:latest
+
+    - name: Build and Push Seed Data Service
+      run: |
+        docker build -t registry:5000/seed-data-service:latest ./seed-data
+        docker push registry:5000/seed-data-service:latest
+
+    - name: Build and Push Vote Service
+      run: |
+        docker build -t registry:5000/vote-service:latest ./vote
+        docker push registry:5000/vote-service:latest
+
+    - name: Build and Push Worker Service
+      run: |
+        docker build -t registry:5000/worker-service:latest ./worker
+        docker push registry:5000/worker-service:latest
+
