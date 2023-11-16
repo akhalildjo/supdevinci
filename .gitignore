@@ -5,3 +5,4 @@ obj/
 .vs/
 node_modules/
 docker-compose.images.yml
+.vscode
