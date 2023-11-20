@@ -167,19 +167,64 @@ Ce guide détaille les étapes pour configurer un runner GitHub Actions auto-hé
 
 ## Mise en Production de l'Application Front-End
 
-1. **Déployer l'Application Front-End** :
-   - Utilisez un fichier YAML de déploiement pour déployer votre application front-end dans Kubernetes.
-   - Assurez-vous que le service correspondant est correctement configuré pour être accessible via l'Ingress.
+1. **Création d'un Namespace Spécifique** :
+   - Créez un namespace dédié pour votre application front-end pour une meilleure organisation et isolation.
+     ```bash
+     kubectl create namespace mon-namespace-front-end
+     ```
 
-2. **Configurer le Domaine et le SSL** :
+2. **Déployer l'Application Front-End dans le Namespace** :
+   - Utilisez un fichier YAML de déploiement pour déployer votre application front-end dans le namespace spécifié.
+     ```yaml
+     apiVersion: apps/v1
+     kind: Deployment
+     metadata:
+       name: mon-application-front-end
+       namespace: mon-namespace-front-end
+     spec:
+       # Configuration du déploiement
+     ---
+     apiVersion: v1
+     kind: Service
+     metadata:
+       name: service-mon-application
+       namespace: mon-namespace-front-end
+     spec:
+       # Configuration du service
+     ```
+
+3. **Configurer le Domaine et le SSL** :
    - Configurez un enregistrement DNS pour pointer vers l'adresse IP de votre Ingress Controller.
    - Utilisez cert-manager ou une méthode similaire pour configurer le SSL et obtenir un certificat HTTPS.
 
-## Vérification et Dépannage
+4. **Configurer un Ingress Resource dans le Namespace** :
+   - Créez un fichier YAML pour définir les règles d'Ingress dans le même namespace.
+     ```yaml
+     apiVersion: networking.k8s.io/v1
+     kind: Ingress
+     metadata:
+       name: mon-application-ingress
+       namespace: mon-namespace-front-end
+       annotations:
+         nginx.ingress.kubernetes.io/rewrite-target: /
+     spec:
+       rules:
+       - host: monapp.exemple.com
+         http:
+           paths:
+           - path: /
+             pathType: Prefix
+             backend:
+               service:
+                 name: service-mon-application
+                 port:
+                   number: 80
+     ```
 
-...
+5. **Vérification et Dépannage** :
+   - Assurez-vous que tous les composants sont déployés dans le bon namespace et fonctionnent comme prévu.
+   - Utilisez `kubectl get pods,services,ingress -n mon-namespace-front-end` pour vérifier l'état des ressources.
 
 ---
 
-Ce document fournit un aperçu complet des étapes pour configurer un runner GitHub Actions sur Kubernetes, avec un focus sur la mise en place d'un Ingress Nginx pour le load balancing et la mise en production d'une application front-end. Pour des détails spécifiques et des configurations supplémentaires, référez-vous à la documentation officielle de Kubernetes, Nginx Ingress, et des outils associés.
 
